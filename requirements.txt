@@ -1,0 +1,25 @@
+# Basic dependencies
+python-dotenv
+pandas
+
+# Web scraping
+scrapy
+docling
+
+# LangChain and vector DB
+langchain
+langchain-openai
+langchain-community
+langchain-chroma
+langchain-core
+langchain-text-splitters
+chromadb
+
+# OpenAI
+openai
+
+# UI
+streamlit
+
+# Utilities
+uuid

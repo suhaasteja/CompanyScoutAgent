@@ -1,16 +1,12 @@
-
-# from langchain_openai import ChatOpenAI
-
-# llm = ChatOpenAI()
-# llm.invoke("Hello, world!")
-
 import getpass
 import os
 from dotenv import load_dotenv
-from langchain.chat_models import init_chat_model
 from langchain_openai import OpenAIEmbeddings
-from langchain_core.vectorstores import InMemoryVectorStore
 from langchain_chroma import Chroma
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from uuid import uuid4
+from langchain_core.documents import Document
+import pandas as pd
 
 
 load_dotenv()
@@ -18,33 +14,21 @@ load_dotenv()
 if "OPENAI_API_KEY" not in os.environ:
   os.environ["OPENAI_API_KEY"] = getpass.getpass("Enter API key for OpenAI: ")
 
-
-llm = init_chat_model("gpt-4o-mini", model_provider="openai")
-
-res = llm.invoke("Hello, world!")
-
-print(res.content)
-
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 
 vector_store = Chroma(
     collection_name="able_collection",
     embedding_function=embeddings,
-    persist_directory="./chroma_langchain_db",  # Where to save data locally, remove if not necessary
+    persist_directory="./chroma_langchain_db", 
 )
-from uuid import uuid4
-
-from langchain_core.documents import Document
 
 documents = []
 
-import pandas as pd
 
 path = "website_scrape.csv"
 
 df = pd.read_csv(path)
 
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
 for index, row in df.iterrows():
