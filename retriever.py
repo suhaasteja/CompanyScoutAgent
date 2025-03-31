@@ -3,6 +3,7 @@ import os
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_community.chat_models import ChatOpenAI
+from crew_test import run_faang_research
 
 import streamlit as st
 
@@ -24,11 +25,17 @@ vector_store = Chroma(
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+if "context" not in st.session_state:
+    st.session_state.context = ""
+
 st.title("Able AI Assistant")
 
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
+        if message["role"] == "assistant" and hasattr(message, "context"):
+            with st.expander("View source context"):
+                st.markdown(message["context"])
 
 
 def format_chat_history(messages):
@@ -68,7 +75,7 @@ def retrieve_results(query):
     """
     
     llm_res = llm.invoke(PROMPT)
-    return llm_res.content
+    return llm_res.content, context
 
 if prompt := st.chat_input("Ask a question about Able"):
     st.session_state.messages.append({"role": "user", "content": prompt})
@@ -76,8 +83,29 @@ if prompt := st.chat_input("Ask a question about Able"):
     with st.chat_message("user"):
         st.markdown(prompt)
         
-    with st.chat_message("assistant"):
-        response = retrieve_results(prompt)
-        st.markdown(response)
+    test_for_report = llm.invoke(f"If this prompt is asking for a report on FAANG or through websearch, return 'True' else 'False' ")
     
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    response = ""
+    
+    check_prompt = f"If this prompt is asking for a report on FAANG stocks, market analysis, or requires web search, respond with only 'True'. Otherwise, respond with only 'False': '{prompt}'"
+    test_response = llm.invoke(check_prompt)
+    is_report_request = test_response.content.strip().lower() == 'true'
+    
+    st.badge(f"Web search needed: {is_report_request}")
+    
+    with st.spinner("Generating response..."):
+        context = ""
+        if is_report_request:
+            st.badge("Using CrewAI for research...")
+            response = run_faang_research()
+        else:
+            st.badge("Using vector database...")
+            response, context = retrieve_results(prompt)
+        
+    with st.chat_message("assistant"):
+        st.markdown(response)
+        if context:
+            with st.expander("View source context"):
+                st.markdown(context)
+        
+    st.session_state.messages.append({"role": "assistant", "content": response, "context": context})
