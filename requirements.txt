@@ -18,6 +18,9 @@ chromadb
 # OpenAI
 openai
 
+#crewAI
+crewai
+
 # UI
 streamlit
 
