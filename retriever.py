@@ -3,7 +3,7 @@ import os
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
 from langchain_community.chat_models import ChatOpenAI
-from crew_test import run_faang_research
+from crew_test import run_faang_research, run_linkedin_content_generation
 
 import streamlit as st
 
@@ -12,9 +12,6 @@ load_dotenv()
 embeddings = OpenAIEmbeddings(model="text-embedding-3-large")
 
 llm = ChatOpenAI(model="gpt-4o-mini")
-
-# res = llm.invoke("hi")
-# print(res.content)
 
 vector_store = Chroma(
     collection_name="able_collection",
@@ -33,7 +30,7 @@ st.title("Able AI Assistant")
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
-        if message["role"] == "assistant" and hasattr(message, "context"):
+        if message["role"] == "assistant" and "context" in message:
             with st.expander("View source context"):
                 st.markdown(message["context"])
 
@@ -48,8 +45,6 @@ def format_chat_history(messages):
     return formatted_history
 
 def retrieve_results(query):
-    # print(query)
-    # query = "What's the Quiller?"
     results = vector_store.similarity_search_with_relevance_scores(query, k=5)  
     context = ""
     
@@ -67,11 +62,11 @@ def retrieve_results(query):
         
         <query>
         {query}
-        <query>
+        </query>
         
         <context>
         {context}
-        <context>
+        </context>
     """
     
     llm_res = llm.invoke(PROMPT)
@@ -82,21 +77,39 @@ if prompt := st.chat_input("Ask a question about Able"):
     
     with st.chat_message("user"):
         st.markdown(prompt)
-        
-    test_for_report = llm.invoke(f"If this prompt is asking for a report on FAANG or through websearch, return 'True' else 'False' ")
     
-    response = ""
+    linkedin_check_prompt = f"""
+    Determine if this prompt is asking for LinkedIn content generation or related to creating social media content.
+    If it is asking for LinkedIn content, social media posts, or content marketing, respond with only 'True'.
+    Otherwise, respond with only 'False'.
     
-    check_prompt = f"If this prompt is asking for a report on FAANG stocks, market analysis, or requires web search, respond with only 'True'. Otherwise, respond with only 'False': '{prompt}'"
-    test_response = llm.invoke(check_prompt)
-    is_report_request = test_response.content.strip().lower() == 'true'
+    Prompt: '{prompt}'
+    """
     
-    st.badge(f"Web search needed: {is_report_request}")
+    linkedin_response = llm.invoke(linkedin_check_prompt)
+    is_linkedin_request = linkedin_response.content.strip().lower() == 'true'
+    
+    is_report_request = False
+    if not is_linkedin_request:
+        check_prompt = f"If this prompt is asking for a report on FAANG stocks, market analysis, or requires web search, respond with only 'True'. Otherwise, respond with only 'False': '{prompt}'"
+        test_response = llm.invoke(check_prompt)
+        is_report_request = test_response.content.strip().lower() == 'true'
+    
+    if is_linkedin_request:
+        st.badge("LinkedIn Content Generation")
+    elif is_report_request:
+        st.badge("FAANG Market Research")
+    else:
+        st.badge("Using Knowledge Base")
     
     with st.spinner("Generating response..."):
         context = ""
-        if is_report_request:
-            st.badge("Using CrewAI for research...")
+        
+        if is_linkedin_request:
+            st.badge("Using CrewAI for LinkedIn content...")
+            response = run_linkedin_content_generation()
+        elif is_report_request:
+            st.badge("Using CrewAI for FAANG research...")
             response = run_faang_research()
         else:
             st.badge("Using vector database...")
