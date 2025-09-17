@@ -6,7 +6,7 @@
 
 ## Project Preview
 
-![Preview of Chatbot UI](./able_ai_assistant-preview
+![Preview of Chatbot UI](./able_ai_assistant-preview)
 
 ***
 
