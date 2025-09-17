@@ -1,79 +1,159 @@
-# Able AI Assistant
+# CompanyScoutAgent
 
-A chatbot application that uses AI to answer questions about Able based on content scraped from their website. The project includes web scraping capabilities, document processing, vector storage with Chroma, and a Streamlit-based chat interface.
+**CompanyScoutAgent** is an AI-powered chatbot and research automation framework to answer questions about any company using web-scraped content, advanced embeddings, and a flexible chat UI. It is built for use cases spanning market research, competitive intelligence, and internal knowledge assistants.
 
-## Components
+***
 
-### 1. Web Crawler (Domain Crawler) - crawler.py
+## Project Preview
 
-A Scrapy-based crawler that systematically visits and indexes pages within a domain:
+![Preview of Chatbot UI](./able_ai_assistant-preview
 
-- Customizable crawl depth
-- Support for staying within a specific domain
-- Exports results to CSV (URLs, titles, etc.)
+***
 
-### 2. Content Scraper - scraper.py
+## Features
 
-Processes URLs from the crawler and extracts structured content:
+- **Automated Domain Crawler**: Recursively crawls a target website (using Scrapy), collects URL metadata, and respects robots.txt and crawl depth.
+- **Intelligent Web Scraper**: Processes discovered URLs, cleans content via [Docling](https://github.com/veriphor/docling), and exports structured markdown.
+- **Semantic Vector Search**: Converts scraped content into OpenAI embeddings and loads into a Chroma vector database for fast similarity search.
+- **Conversational Chatbot Interface (RAG) **: Streamlit-powered frontend with memory, context, and integration of LLM retrieval/response logic.
+- **Dynamic Research Agents**: Includes modular CrewAI agent templates for market research (e.g., FAANG analysis) and LinkedIn/social content generation.
+- **Modular Pipeline**: Each step (crawling, scraping, embedding, retrieval, UI) can be independently run, customized, or extended.
 
-- Uses docling to convert web pages to markdown
-- Cleans and normalizes content
-- Saves results to CSV (URL, title, markdown content)
+***
 
-### 3. Vector Database Setup - vectordb_setup.py
+## Quick Start
 
-Processes scraped content and prepares it for semantic search:
-
-- Splits content into manageable chunks
-- Generates embeddings using OpenAI's embedding model
-- Stores vectors in a Chroma database for efficient retrieval
-
-### 4. Streamlit Chat Interface - retriever.py
-
-Provides a user-friendly chat interface for interacting with Able's information:
-
-- Maintains conversation history
-- Uses semantic search to find relevant content
-- Formats prompts with proper context for the AI assistant
-- Presents responses in a clean chat interface
-
-## Setup and Installation
-
-1. Clone this repository
-2. Install the required dependencies:
-   ```
-   pip install -r requirements.txt
-   ```
-3. Set up your environment variables:
-   - Create a `.env` file with your `OPENAI_API_KEY`
-   - Or set the environment variable manually
-
-## Usage
-
-### Running the Web Crawler
+### 1. Clone the Repository
 
 ```bash
-python domain_crawler.py https://able.com --max-depth 2 --output-file domain_urls.csv
+git clone https://github.com/suhaasteja/CompanyScoutAgent
+cd CompanyScoutAgent
 ```
 
-### Processing and Scraping Content
+### 2. Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Set API Keys
+
+Set your OpenAI API key (and Serper API key for web search, if CrewAI agents are used):
+
+```bash
+# .env file in repo root
+OPENAI_API_KEY=your_openai_key
+SERPER_API_KEY=your_serper_api_key   # if using web search
+```
+
+***
+
+## Pipeline Usage
+
+#### 1. Crawl Target Domain
+
+```bash
+python crawler.py https://example.com --max-depth 2 --output-file domain_urls.csv
+```
+- Crawls and indexes URLs, titles, and status within the domain.
+
+#### 2. Scrape Structured Content
 
 ```bash
 python scraper.py
 ```
+- Uses Docling to extract clean markdown content from each URL.
 
-### Building the Vector Database
+#### 3. Build Vector Database
 
 ```bash
 python vectordb_setup.py
 ```
+- Splits markdown into semantic chunks, embeds with OpenAI, stores in Chroma DB.
 
-### Starting the Chatbot Interface
+#### 4. Launch the Chatbot
 
 ```bash
 streamlit run retriever.py
 ```
+- Opens a Streamlit conversational assistant leveraging both vector DB and LLM logic.
 
-### Preview
+***
 
-![Preview](./able_ai_assistant-preview.png)
+## Additional Functionality
+
+- **crew_test.py**: Agent demo file with:
+  - Research agent for FAANG market analysis (with real-time web search and scraping capabilities).
+  - LinkedIn content/post generator agent leveraging LLMs and custom search tools.
+- **Data Artifacts**:
+  - `domain_urls.csv`: Discovered site structure.
+  - `website_scrape.csv`: Clean page content and titles.
+- **Embeddings/Vector DB**:
+  - Uses OpenAI's `"text-embedding-3-large"` by default.
+  - Chroma DB persisted to disk for fast access.
+
+***
+
+## Architecture Diagram
+
+```
+                +--------------------+
+                |   Target Website   |
+                +--------------------+
+                         |
+           1. Crawl URLs |
+                         v
+                +--------------------+
+                |   crawler.py       | --(CSV: domain_urls.csv)-->
+                +--------------------+
+                         |
+        2. Scrape & Clean|
+                         v
+                +--------------------+
+                |   scraper.py       | --(CSV: website_scrape.csv)-->
+                +--------------------+
+                         |
+         3. Embed & Index|
+                         v
+                +--------------------+
+                | vectordb_setup.py  | --(Chroma DB)-->
+                +--------------------+
+                         |
+    4. Chat/Research/Retrieval UI   |
+                         v
+                +--------------------+
+                |  retriever.py (+    |
+                |     CrewAI agents)  |
+                +--------------------+
+```
+
+***
+
+## Requirements
+
+- Python 3.8+
+- See `requirements.txt` for all Python dependencies.
+
+***
+
+## Credits
+
+- [Scrapy](https://scrapy.org/) for crawling
+- [Docling](https://github.com/veriphor/docling) for robust HTML to markdown conversion
+- [LangChain](https://python.langchain.com/) and [ChromaDB](https://www.trychroma.com/) for AI retrieval
+- [Streamlit](https://streamlit.io/) for the UI
+- [OpenAI](https://platform.openai.com/) for LLM and embeddings
+- [CrewAI](https://github.com/joaomdmoura/crewAI) for multi-agent coordination tools
+
+***
+
+## Contributing
+
+Pull requests welcome! Please open an issue to discuss feature ideas or bugs.
+
+***
+
+**Questions or feedback?**  
+Please create an issue or reach out via [GitHub Discussions](https://github.com/suhaasteja/CompanyScoutAgent/discussions).
+
+***
