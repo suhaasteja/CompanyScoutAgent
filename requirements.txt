@@ -27,4 +27,4 @@ streamlit
 # Utilities
 uuid
 
-#sqlite3
+sqlite3
