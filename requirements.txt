@@ -27,4 +27,6 @@ streamlit
 # Utilities
 uuid
 
-sqlite3
+mysqlclient
+sqlalchemy
+pysqlite3-binary
