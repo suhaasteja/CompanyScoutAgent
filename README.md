@@ -1,159 +1,140 @@
-# CompanyScoutAgent
+# CompanyScout
 
-**CompanyScoutAgent** is an AI-powered chatbot and research automation framework to answer questions about any company using web-scraped content, advanced embeddings, and a flexible chat UI. It is built for use cases spanning market research, competitive intelligence, and internal knowledge assistants.
+VC-grade company research tool with AI-powered analysis, source citations, and smart caching.
 
-***
-
-## Project Preview
-
-![Preview of Chatbot UI](./able_ai_assistant-preview.png)
-
-***
+![CompanyScout Demo](demo.gif)
 
 ## Features
 
-- **Automated Domain Crawler**: Recursively crawls a target website (using Scrapy), collects URL metadata, and respects robots.txt and crawl depth.
-- **Intelligent Web Scraper**: Processes discovered URLs, cleans content via [Docling](https://github.com/veriphor/docling), and exports structured markdown.
-- **Semantic Vector Search**: Converts scraped content into OpenAI embeddings and loads into a Chroma vector database for fast similarity search.
-- **Conversational Chatbot Interface (RAG) **: Streamlit-powered frontend with memory, context, and integration of LLM retrieval/response logic.
-- **Dynamic Research Agents**: Includes modular CrewAI agent templates for market research (e.g., FAANG analysis) and LinkedIn/social content generation.
-- **Modular Pipeline**: Each step (crawling, scraping, embedding, retrieval, UI) can be independently run, customized, or extended.
-
-***
+- **Instant Company Research** — Enter any company URL, get a structured investment brief
+- **Investment Scorecard** — AI-generated scores (1-10) across 6 dimensions with reasoning
+- **Source Citations** — Every claim links back to its source page for verification
+- **Smart Caching** — Research is saved locally; instant reload for previously analyzed companies
+- **Hybrid Search Chat** — Ask follow-up questions using semantic + keyword search
+- **Deal Memo Generator** — One-click investment memo with thesis, risks, and recommendation
+- **Diligence Questions** — Auto-generated questions specific to each company
 
 ## Quick Start
 
-### 1. Clone the Repository
+### 1. Clone & Install
 
 ```bash
-git clone https://github.com/suhaasteja/CompanyScoutAgent
+git clone https://github.com/suhaasteja/CompanyScoutAgent.git
 cd CompanyScoutAgent
-```
-
-### 2. Install Dependencies
-
-```bash
 pip install -r requirements.txt
 ```
 
-### 3. Set API Keys
+### 2. Set up API Key
 
-Set your OpenAI API key (and Serper API key for web search, if CrewAI agents are used):
+**Option A:** Create `.env` file
+```bash
+cp .env.example .env
+# Edit .env and add your OpenAI API key
+```
+
+**Option B:** Enter in UI
+- Launch the app and enter your key in the Settings panel
+
+### 3. Run
 
 ```bash
-# .env file in repo root
-OPENAI_API_KEY=your_openai_key
-SERPER_API_KEY=your_serper_api_key   # if using web search
+streamlit run app.py
 ```
 
-***
+Open http://localhost:8501 and try: `linear.app`, `supabase.com`, or `posthog.com`
 
-## Pipeline Usage
-
-#### 1. Crawl Target Domain
-
-```bash
-python crawler.py https://example.com --max-depth 2 --output-file domain_urls.csv
-```
-- Crawls and indexes URLs, titles, and status within the domain.
-
-#### 2. Scrape Structured Content
-
-```bash
-python scraper.py
-```
-- Uses Docling to extract clean markdown content from each URL.
-
-#### 3. Build Vector Database
-
-```bash
-python vectordb_setup.py
-```
-- Splits markdown into semantic chunks, embeds with OpenAI, stores in Chroma DB.
-
-#### 4. Launch the Chatbot
-
-```bash
-streamlit run retriever.py
-```
-- Opens a Streamlit conversational assistant leveraging both vector DB and LLM logic.
-
-***
-
-## Additional Functionality
-
-- **crew_test.py**: Agent demo file with:
-  - Research agent for FAANG market analysis (with real-time web search and scraping capabilities).
-  - LinkedIn content/post generator agent leveraging LLMs and custom search tools.
-- **Data Artifacts**:
-  - `domain_urls.csv`: Discovered site structure.
-  - `website_scrape.csv`: Clean page content and titles.
-- **Embeddings/Vector DB**:
-  - Uses OpenAI's `"text-embedding-3-large"` by default.
-  - Chroma DB persisted to disk for fast access.
-
-***
-
-## Architecture Diagram
+## How It Works
 
 ```
-                +--------------------+
-                |   Target Website   |
-                +--------------------+
-                         |
-           1. Crawl URLs |
-                         v
-                +--------------------+
-                |   crawler.py       | --(CSV: domain_urls.csv)-->
-                +--------------------+
-                         |
-        2. Scrape & Clean|
-                         v
-                +--------------------+
-                |   scraper.py       | --(CSV: website_scrape.csv)-->
-                +--------------------+
-                         |
-         3. Embed & Index|
-                         v
-                +--------------------+
-                | vectordb_setup.py  | --(Chroma DB)-->
-                +--------------------+
-                         |
-    4. Chat/Research/Retrieval UI   |
-                         v
-                +--------------------+
-                |  retriever.py (+    |
-                |     CrewAI agents)  |
-                +--------------------+
+Enter URL → Discover Pages → Scrape Content → LLM Extraction → Display
+                                    ↓
+                            Save to SQLite + ChromaDB
+                                    ↓
+                            Instant reload next time
 ```
 
-***
+### Tech Stack
 
-## Requirements
+| Component | Technology |
+|-----------|------------|
+| UI | Streamlit |
+| LLM | OpenAI GPT-4o-mini |
+| Embeddings | OpenAI text-embedding-3-small |
+| Vector DB | ChromaDB |
+| Database | SQLite |
+| Scraping | requests + BeautifulSoup |
 
-- Python 3.8+
-- See `requirements.txt` for all Python dependencies.
+### Research Depth Options
 
-***
+| Mode | Pages | Speed |
+|------|-------|-------|
+| Quick scan | 5 | ~10s |
+| Standard | 10 | ~20s |
+| Deep dive | 18 | ~40s |
 
-## Credits
+## Data Extracted
 
-- [Scrapy](https://scrapy.org/) for crawling
-- [Docling](https://github.com/veriphor/docling) for robust HTML to markdown conversion
-- [LangChain](https://python.langchain.com/) and [ChromaDB](https://www.trychroma.com/) for AI retrieval
-- [Streamlit](https://streamlit.io/) for the UI
-- [OpenAI](https://platform.openai.com/) for LLM and embeddings
-- [CrewAI](https://github.com/joaomdmoura/crewAI) for multi-agent coordination tools
+- Company name & description
+- Industry & business model
+- Founders & team size
+- Tech stack
+- Key products
+- Funding stage & investors
+- Hiring signals
+- Competitive advantages
+- Potential risks
 
-***
+All fields include source URLs for verification.
+
+## Investment Scoring
+
+Each company is scored (1-10) on:
+
+| Dimension | What it measures |
+|-----------|------------------|
+| Market | Size & growth of the market |
+| Team | Founder/team quality indicators |
+| Product | Uniqueness & defensibility |
+| Model | Revenue model clarity |
+| Timing | Market timing & trends |
+| Overall | Holistic investment attractiveness |
+
+Hover over any score to see reasoning and sources.
+
+## Limitations
+
+- **Website-only data** — No financials, no growth metrics, no private data
+- **Cloudflare-protected sites** — Some sites block scraping (e.g., openai.com, stripe.com)
+- **LLM judgment** — Scores are AI-generated, not financial advice
+
+## Sites That Work Well
+
+```
+linear.app, supabase.com, posthog.com, railway.app,
+vercel.com, temporal.io, modal.com, replicate.com,
+huggingface.co, anthropic.com, notion.so, figma.com
+```
+
+## Project Structure
+
+```
+CompanyScoutAgent/
+├── app.py              # Main Streamlit application
+├── company_analyzer.py # LLM-powered data extraction
+├── storage.py          # SQLite + ChromaDB storage
+├── requirements.txt    # Python dependencies
+├── .env.example        # API key template
+└── data/               # Local database (gitignored)
+```
 
 ## Contributing
 
-Pull requests welcome! Please open an issue to discuss feature ideas or bugs.
+PRs welcome! Areas for improvement:
+- External data sources (Crunchbase, LinkedIn, GitHub)
+- Company comparison mode
+- Batch analysis
+- Export to Notion/Airtable
 
-***
+## License
 
-**Questions or feedback?**  
-Please create an issue or reach out via [GitHub Discussions](https://github.com/suhaasteja/CompanyScoutAgent/discussions).
-
-***
+MIT
