@@ -174,3 +174,14 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# CompanyScout data (SQLite + ChromaDB)
+data/
+chroma_langchain_db/
+
+# Old data files
+*.csv
+*.png
+
+# Demo video (too large for git)
+*.mov

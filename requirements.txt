@@ -1,32 +1,13 @@
-# Basic dependencies
+# Core
 python-dotenv
-pandas
-
-# Web scraping
-scrapy
-docling
-
-# LangChain and vector DB
-langchain
-langchain-openai
-langchain-community
-langchain-chroma
-langchain-core
-langchain-text-splitters
-chromadb
-
-# OpenAI
 openai
 
-#crewAI
-crewai
+# Web scraping
+requests
+beautifulsoup4
+
+# Vector database
+chromadb
 
 # UI
 streamlit
-
-# Utilities
-uuid
-
-mysqlclient
-sqlalchemy
-pysqlite3-binary
